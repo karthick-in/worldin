@@ -1,0 +1,134 @@
+Create a spring boot app
+	Generate JAR -> maven install (Jar file will be available on /target folder)
+	
+Download docker desktop - https://docs.docker.com/desktop/windows/install/
+Create a dockerfile in your project's root folder (refer online)
+Create a Kubernetes manifest yaml file in your project's root folder (refer online)
+	Reference repo - https://github.com/karthick-in/worldin
+
+-------------------------------------
+
+Docker Commands
+
+Create image
+	docker build -t <new-image-name>:v1 .
+
+List images
+	docker images
+
+Create container
+	docker run -p8080:8080 <new-image-name>:v1
+	
+Check running containers
+	docker ps
+	
+Check all containers
+	docker ps -a
+	
+Stop container
+	docker container stop <container-id>
+	
+Start container
+	docker container start <container-id>
+
+
+-------------------------------------
+
+Azure Kubernetes Deployment Commands
+
+Reference - https://docs.microsoft.com/en-us/azure/aks/tutorial-kubernetes-prepare-app
+
+After creating docker container,
+
+Create Azure Container Registry(ACR) in portal
+Execute commands to push local docker container to ACR
+
+	# Authenticate to Azure
+	Connect-AzAccount -SubscriptionId <subscription-id>
+	# Get newly created ACR's login server
+	(Get-AzContainerRegistry -ResourceGroupName <resource-group> -Name <acr-name>).LoginServer
+	# Authenticate
+	Connect-AzContainerRegistry -Name <acr-name>
+	# Tag and push container to ACR
+	docker tag <new-image-name>:v1 <acr-login-server>/<new-image-name>:v1
+	docker images
+	docker push <acr-login-server>/<new-image-name>:v1
+
+Create Azure Kubernetes Service(AKS) cluster in portal
+Create a public IP address with Standard SKU (static) in auto created resource group (start with MC_*) in portal
+	Assign this newly created IP to "loadBalancerIP" property in '<kubernetes-manifest>.yaml' file (this is the request IP,  note it).
+Execute commands to deploy in AKS
+
+	# Install 'Kubectl' if required
+	Install-AzAksKubectl
+	Import-AzAksCredential -ResourceGroupName <resource-group> -Name <aks-name>
+	kubectl get nodes
+	kubectl get pods
+	kubectl apply -f <kubernetes-manifest>.yaml
+	kubectl get service <service-name-from-yaml>
+	# Scale instance manually
+	# <deployment-name> is the "metadata.name" from yaml file
+	kubectl scale --replicas=5 deployment/<deployment-name>
+	
+-------------------------------------
+
+Update Code and Deploy
+	
+Remove existing images (optional)
+	docker rmi <image-name>:v1
+Remove container (optional)
+	docker rm <container-id>
+	
+Create image as 'v2' tag
+	docker build -t <image-name>:v2 .
+	
+Create container for 'v2'
+	docker run -p8080:8080 <image-name>:v2
+	
+	docker <image-name>:v2 <acr-login-server>/<image-name>:v2
+	Connect-AzContainerRegistry -Name <acr-name>
+	docker push <acr-login-server>/<new-image-name>:v2
+	kubectl set image deployment <deployment-name> <deployment-name>=<acr-login-server>/<new-image-name>:v2
+	
+
+-------------------------------------
+
+Shell into local Docker Container directories
+	docker exec -it <container-id> /bin/sh
+	
+Copy logs from docker container
+	docker cp <container-id>:/logs/Apps.log "C:\Logs\Exported.log"
+
+Copy logs from Kubernetes
+	(kubectl exec <pod-name> -- cat /logs/Apps.log) | Out-String | Set-Content "Exported.log"
+
+Stream pog logs
+	kubectl logs -f <pod-name>
+
+-------------------------------------
+
+Delete deployments and services
+	kubectl delete deploy <deployment-name>
+	kubectl delete service <deployment-name>
+	
+Check error or other details
+	kubectl describe service <deployment-name>
+
+
+-------------------------------------
+
+What is my outgoing ip from Kubernetes? (run in cmd)
+
+	# Get ubuntu image (first time only)
+	kubectl run -it --rm aks-ip --image=mcr.microsoft.com/aks/fundamental/base-ubuntu:v0.0.11
+	apt-get update && apt-get install curl -y
+	curl -s checkip.dyndns.org
+	
+	# Get into ubuntu after first time
+	kubectl exec --stdin --tty aks-ip -- /bin/bash
+	
+-------------------------------------
+	
+	
+
+

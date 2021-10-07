@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: worldin
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: worldin
@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: worldin
-          image: worldinacr.azurecr.io/worldindocimage:v1
+          image: worldinacr.azurecr.io/worldindocimage:v4
           ports:
             - containerPort: 8080
 ---
@@ -25,6 +25,7 @@ metadata:
   labels:
     name: worldin
 spec:
+  loadBalancerIP: <your-public-request-ip>
   ports:
     - port: 8080
       targetPort: 8080
