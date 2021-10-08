@@ -55,7 +55,7 @@ Execute commands to push local docker container to ACR
 	docker push <acr-login-server>/<new-image-name>:v1
 
 Create Azure Kubernetes Service(AKS) cluster in portal
-Create a public IP address with Standard SKU (static) in auto created resource group (start with MC_*) in portal
+Create a public IP address with Standard SKU (static) in auto created resource group (start with MC_*) in portal (reason - https://docs.microsoft.com/en-us/azure/aks/egress)
 	Assign this newly created IP to "loadBalancerIP" property in '<kubernetes-manifest>.yaml' file (this is the request IP,  note it).
 Execute commands to deploy in AKS
 
