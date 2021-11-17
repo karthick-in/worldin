@@ -3,6 +3,8 @@ package com.worldingroup.worldin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,40 +17,34 @@ import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlobDirectory;
 
+import java.net.InetAddress;
 
 import org.apache.log4j.Logger;
 //import org.apache.log4j.PropertyConfigurator;
 
 @SpringBootApplication
 @RestController
-public class WorldinApplication {
+public class WorldinApplication { //extends SpringBootServletInitializer {
 	
 	private static Logger logger = Logger.getLogger(WorldinApplication.class);
 	private static String dbConfig = null;
-	/*
-	 * Load log4j.properties from outside War.
-	 */
-//	{
-//		try {
-//			System.out.println("Loading logger...");
-//			PropertyConfigurator.configure("src/main/resources/log4j.properties");
-//		}catch (Exception e) {
-//			System.out.println("ERROR while loading logger!");
-//			e.printStackTrace();
-//			System.out.println(e.toString());
-//		}
-//	}
 
     @Autowired
     private Environment environment;
 
 	public static void main(String[] args) {
 		SpringApplication.run(WorldinApplication.class, args);
-	}
-	
+	}	
+	 
+	 // Required only if need to run on tomcat as WAR file
+//    @Override
+//    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+//        return builder.sources(WorldinApplication.class);
+//    }    
+    
 	@RequestMapping("/")
 	public String hello()   
-	{  
+	{
 		logger.info("Root app requested...");
 		return "<h1>Hello from Worldin, we're up and running...</h1>";  
 	}
@@ -59,7 +55,21 @@ public class WorldinApplication {
 		try {
 			logger.info("Connect blob requested...");
 			
-			StorageCredentials creds = new StorageCredentialsAccountAndKey(environment.getProperty("azure.storage.account-name"), environment.getProperty("azure.storage.account-key"));
+			String jmxRemote = System.getProperty("com.sun.management.jmxremote"); 
+			String jmxRemotePort = System.getProperty("com.sun.management.jmxremote.port");
+			String ip = InetAddress.getLoopbackAddress().getHostAddress();
+			
+			logger.info(jmxRemote);
+			logger.info(jmxRemotePort);
+			logger.info(ip);
+			
+			logger.info(environment.getProperty("java.rmi.server.hostname"));
+	        logger.info(environment.getProperty("local.server.port"));
+	        logger.info(InetAddress.getLocalHost().getHostAddress());
+			
+			String storage_account = environment.getProperty("azure.storage.account-name");
+			logger.info("Authenticating to Storage account = "+storage_account);
+			StorageCredentials creds = new StorageCredentialsAccountAndKey(storage_account, environment.getProperty("azure.storage.account-key"));
 			CloudStorageAccount strAcc = new CloudStorageAccount(creds, true);
 			logger.info("Storage account authenticated");
 			CloudBlobClient blobClient = strAcc.createCloudBlobClient();

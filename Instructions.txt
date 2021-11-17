@@ -1,5 +1,5 @@
 Create a spring boot app
-	Generate JAR -> maven install (Jar file will be available on /target folder)
+	Generate JAR/WAR file -> maven install (Jar/War file will be available on /target folder)
 	
 Download docker desktop - https://docs.docker.com/desktop/windows/install/
 Create a dockerfile in your project's root folder (refer online)
@@ -31,6 +31,8 @@ Stop container
 Start container
 	docker container start <container-id>
 
+Stream logs in docker
+	docker logs -f <container-id>
 
 -------------------------------------
 
@@ -42,6 +44,9 @@ After creating docker container,
 
 Create Azure Container Registry(ACR) in portal
 Execute commands to push local docker container to ACR
+
+	Install Az PowerShell module
+	Install-Module -Name Az -Scope CurrentUser -Force
 
 	# Authenticate to Azure
 	Connect-AzAccount -SubscriptionId <subscription-id>
@@ -55,11 +60,13 @@ Execute commands to push local docker container to ACR
 	docker push <acr-login-server>/<new-image-name>:v1
 
 Create Azure Kubernetes Service(AKS) cluster in portal
+# TODO no need to create public IP, use existing IP in newly created group
 Create a public IP address with Standard SKU (static) in auto created resource group (start with MC_*) in portal (reason - https://docs.microsoft.com/en-us/azure/aks/egress)
 	Assign this newly created IP to "loadBalancerIP" property in '<kubernetes-manifest>.yaml' file (this is the request IP,  note it).
 Execute commands to deploy in AKS
 
 	# Install 'Kubectl' if required
+	# TODO deployment can be done with a YAML file on portal AKS/Namespace
 	Install-AzAksKubectl
 	Import-AzAksCredential -ResourceGroupName <resource-group> -Name <aks-name>
 	kubectl get nodes
@@ -99,7 +106,7 @@ Shell into local Docker Container directories
 Copy logs from docker container
 	docker cp <container-id>:/logs/Apps.log "C:\Logs\Exported.log"
 
-Copy logs from Kubernetes
+Copy logs from Kubernetes pods
 	(kubectl exec <pod-name> -- cat /logs/Apps.log) | Out-String | Set-Content "Exported.log"
 
 Stream pog logs
@@ -124,7 +131,7 @@ What is my outgoing ip from Kubernetes? (run in cmd)
 	apt-get update && apt-get install curl -y
 	curl -s checkip.dyndns.org
 	
-	# Get into ubuntu after first time
+	# Get into ubuntu
 	kubectl exec --stdin --tty aks-ip -- /bin/bash
 	
 -------------------------------------
