@@ -1,11 +1,15 @@
 package com.worldingroup.worldin;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,7 +21,12 @@ import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlobDirectory;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.InetAddress;
+import java.net.URL;
+import java.nio.charset.Charset;
 
 import org.apache.log4j.Logger;
 //import org.apache.log4j.PropertyConfigurator;
@@ -111,6 +120,40 @@ public class WorldinApplication { //extends SpringBootServletInitializer {
 			
 		}
 		return dbConfig;
+	}
+	
+	@RequestMapping("/readBlobFile")
+    public String readBlobFile() {
+		try {
+			// Read blob using SAS URL
+			InputStream inputStream = new URL(environment.getProperty("azure.storage.read-blob")).openStream();
+			String ret = StreamUtils.copyToString(
+					inputStream,
+	                Charset.defaultCharset());
+			logger.info("Blob read success");
+			return ret;
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return "Failed to read Blob via SAS URL";
+		}
+    }
+
+	// Function to demonstrate log4j stderr logging..
+	@RequestMapping("/sendError")
+	public String sendError()
+	{
+		try {
+			logger.info("sendError invoked...");
+			logger.warn("WARNING message!..");
+			logger.error("ERROR message!!..");
+			throw new Exception("Testing error raised!");
+		} catch (Exception e) {
+			// TODO: handle exception
+			logger.error(e.toString());
+			e.printStackTrace();
+			return "Testing error raised!";		
+		}
 	}
 	
 	
