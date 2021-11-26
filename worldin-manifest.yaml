@@ -17,6 +17,9 @@ spec:
           image: worldinacr.azurecr.io/worldindocimage:v4
           ports:
             - containerPort: 8080
+          env:
+            - name: SPRING_PROFILE
+              value: prod
 ---
 apiVersion: v1
 kind: Service

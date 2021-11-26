@@ -33,6 +33,9 @@ Start container
 
 Stream logs in docker
 	docker logs -f <container-id>
+	
+Create container with ENV variable set
+	docker run --name <new-container-name> -e <ENV_NAME>=<env-value> -p8080:8080 <new-image-name>:v1
 
 -------------------------------------
 

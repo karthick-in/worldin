@@ -155,6 +155,22 @@ public class WorldinApplication { //extends SpringBootServletInitializer {
 			return "Testing error raised!";		
 		}
 	}
+
+
+	@RequestMapping("/curProfile")
+	public String curProfile()
+	{
+		try {
+			String curProfile = environment.getProperty("spring.profiles.active");
+			logger.info("spring.profiles.active = "+ curProfile);
+			return curProfile;
+		} catch (Exception e) {
+			// TODO: handle exception
+			logger.error(e.toString());
+			e.printStackTrace();
+			return "Failed to get!";
+		}
+	}
 	
 	
 }
