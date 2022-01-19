@@ -4,7 +4,8 @@ Create a spring boot app
 Download docker desktop - https://docs.docker.com/desktop/windows/install/
 Create a dockerfile in your project's root folder (refer online)
 Create a Kubernetes manifest yaml file in your project's root folder (refer online)
-	Reference repo - https://github.com/karthick-in/worldin
+
+Reference repo - https://github.com/karthick-in/worldin
 
 -------------------------------------
 
@@ -41,14 +42,14 @@ Create container with ENV variable set
 
 Azure Kubernetes Deployment Commands
 
-Reference - https://docs.microsoft.com/en-us/azure/aks/tutorial-kubernetes-prepare-app
+For more info, refer - https://docs.microsoft.com/en-us/azure/aks/tutorial-kubernetes-prepare-app
 
 After creating docker container,
 
-Create Azure Container Registry(ACR) in portal
-Execute commands to push local docker container to ACR
+Create Azure Container Registry(ACR) in portal.
+Execute below commands to push local docker container to ACR.
 
-	Install Az PowerShell module
+	# Install Az PowerShell module if not available with below command
 	Install-Module -Name Az -Scope CurrentUser -Force
 
 	# Authenticate to Azure
@@ -63,13 +64,18 @@ Execute commands to push local docker container to ACR
 	docker push <acr-login-server>/<new-image-name>:v1
 
 Create Azure Kubernetes Service(AKS) cluster in portal
-# TODO no need to create public IP, use existing IP in newly created group
-Create a public IP address with Standard SKU (static) in auto created resource group (start with MC_*) in portal (reason - https://docs.microsoft.com/en-us/azure/aks/egress)
-	Assign this newly created IP to "loadBalancerIP" property in '<kubernetes-manifest>.yaml' file (this is the request IP,  note it).
-Execute commands to deploy in AKS
 
-	# Install 'Kubectl' if required
-	# TODO deployment can be done with a YAML file on portal AKS/Namespace
+	Get the automatically created public IP from AKS node resource group (starts with MC_*)
+	Assign this IP to "loadBalancerIP" property in '<kubernetes-manifest>.yaml' file (this is the request IP,  note it).
+	
+Deploy via Portal
+
+	Navigate to your AKS -> Workloads -> Add -> Add with YAML, and supply the deployment YAML to create
+	Navigate to your AKS -> Services and ingresses -> Add -> Add with YAML, and supply the service YAML to create
+	
+Deploy via local PowerShell
+
+	# Install 'Kubectl' if not available already
 	Install-AzAksKubectl
 	Import-AzAksCredential -ResourceGroupName <resource-group> -Name <aks-name>
 	kubectl get nodes
@@ -129,12 +135,12 @@ Check error or other details
 
 What is my outgoing ip from Kubernetes? (run in cmd)
 
-	# Get ubuntu image (first time only)
+	# Get ubuntu image (one time only)
 	kubectl run -it --rm aks-ip --image=mcr.microsoft.com/aks/fundamental/base-ubuntu:v0.0.11
 	apt-get update && apt-get install curl -y
 	curl -s checkip.dyndns.org
 	
-	# Get into ubuntu
+	# Get into ubuntu bash
 	kubectl exec --stdin --tty aks-ip -- /bin/bash
 	
 -------------------------------------
